@@ -1,143 +1,143 @@
 import pygame
 from pygame.locals import *
 import random
-import configuracion
+import config
 from icarus import Icarus
-from entorno import PlataformaMovil
-from columnas import Columnas
-from base_columna import ColumnaBase
-from fuste_cabeza import ColumnaCuerpo
+from environment import MovingPlatform
+from columns import Columns
+from base_column import ColumnBase
+from column_body import ColumnBody
 
 
 pygame.init()
 clock = pygame.time.Clock()
 
-screen = pygame.display.set_mode((configuracion.SCREEN_WIDTH, configuracion.SCREEN_HEIGHT))
+screen = pygame.display.set_mode((config.SCREEN_WIDTH, config.SCREEN_HEIGHT))
 pygame.display.set_caption('Icaroop')
 
-flying = configuracion.FLYING
-game_over = configuracion.GAME_OVER
+flying = config.FLYING
+game_over = config.GAME_OVER
 
-# Cargamos la tipografia de letra
-score_font = pygame.font.Font(f'{configuracion.FONT_PATH}Icarop.ttf', configuracion.SCORE_FONT_SIZE)
-title_font = pygame.font.Font(f'{configuracion.FONT_PATH}Icarop.ttf', configuracion.TITTLE_FONT_SIZE)
+# Load the letter typography
+score_font = pygame.font.Font(f'{config.FONT_PATH}Icarop.ttf', config.SCORE_FONT_SIZE)
+title_font = pygame.font.Font(f'{config.FONT_PATH}Icarop.ttf', config.TITTLE_FONT_SIZE)
 
-# Grupos y objetos
-# ícaro
+# Groups and objects
+# Icarus
 icarus_group = pygame.sprite.Group()
-icarus = Icarus(100, int(configuracion.SCREEN_HEIGHT/2))
+icarus = Icarus(100, int(config.SCREEN_HEIGHT/2))
 icarus_group.add(icarus)
 
-# columnas (con método antiguo)
-columnas_group = pygame.sprite.Group()
-bottom_column = Columnas(-configuracion.SCREEN_WIDTH, int(configuracion.SCREEN_HEIGHT/2) + 118, -1)
-top_column = Columnas(-configuracion.SCREEN_WIDTH, int(configuracion.SCREEN_HEIGHT/2) - 118, 1)
-columnas_group.add(bottom_column)
-columnas_group.add(top_column)
-ultima_columna = pygame.time.get_ticks()
+# Columns (with old method)
+columns_group = pygame.sprite.Group()
+bottom_column = Columns(-config.SCREEN_WIDTH, int(config.SCREEN_HEIGHT/2) + 118, -1)
+top_column = Columns(-config.SCREEN_WIDTH, int(config.SCREEN_HEIGHT/2) - 118, 1)
+columns_group.add(bottom_column)
+columns_group.add(top_column)
+last_column = pygame.time.get_ticks()
 
-# Entorno
-suelo = PlataformaMovil("suelo.png", configuracion.SCREEN_HEIGHT)
-techo = PlataformaMovil("techo.jpeg", 0, es_techo=True)
+# Environment
+ground = MovingPlatform("suelo.png", config.SCREEN_HEIGHT)
+ceiling = MovingPlatform("techo.jpeg", 0, is_ceiling=True)
 
-# FUNCIONES
-def dibujar_texto(texto, fuente, color, x, y, pantalla):
-    # Convertimos el texto en imagen
-    # El 'True' es para el "Antialiasing" (suaviza los bordes de las letras)
-    imagen_texto = fuente.render(texto, True, color)
+# FUNCTIONS
+def draw_text(text, font, color, x, y, screen):
+    # Convert the text into an image
+    # The 'True' is for "Antialiasing" (smooths the edges of the letters)
+    text_image = font.render(text, True, color)
     
-    # Posicionamos de la misma manera que con Ícaro
-    rectangulo_texto = imagen_texto.get_rect(center=(x, y))
+    # Position the same way as with Icarus
+    text_rect = text_image.get_rect(center=(x, y))
     
-    # Dibujamos en pantalla
-    pantalla.blit(imagen_texto, rectangulo_texto)
+    # Draw on screen
+    screen.blit(text_image, text_rect)
 
-# Fondo (con protección por si falla)
+# Background (with protection in case of failure)
 try:
-    bg = pygame.image.load(f'{configuracion.IMAGE_PATH}fondo.png').convert()
-    bg = pygame.transform.scale(bg, (configuracion.SCREEN_WIDTH, configuracion.SCREEN_HEIGHT))
+    bg = pygame.image.load(f'{config.IMAGE_PATH}fondo.png').convert()
+    bg = pygame.transform.scale(bg, (config.SCREEN_WIDTH, config.SCREEN_HEIGHT))
 except:
-    bg = pygame.Surface((configuracion.SCREEN_WIDTH, configuracion.SCREEN_HEIGHT))
+    bg = pygame.Surface((config.SCREEN_WIDTH, config.SCREEN_HEIGHT))
     bg.fill((135, 206, 235))
 
 
-# Bucle del juego
+# Game loop
 score = 0
 run = True
 while run:
-        clock.tick(configuracion.FPS) 
+        clock.tick(config.FPS) 
         screen.blit(bg, (0, 0))
 
-        # --- DIBUJAR ---
+        # --- DRAW ---
         if(not flying and not game_over):
-            dibujar_texto('PLAY', title_font, configuracion.NARANJA, configuracion.SCREEN_WIDTH/2, configuracion.SCREEN_HEIGHT/2 - 50, screen)
+            draw_text('PLAY', title_font, config.ORANGE, config.SCREEN_WIDTH/2, config.SCREEN_HEIGHT/2 - 50, screen)
 
-        # Jugador
+        # Player
         icarus_group.draw(screen)
 
-        # Columnas
-        columnas_group.draw(screen)
+        # Columns
+        columns_group.draw(screen)
 
-        # Entorno
-        suelo.draw(screen)
-        techo.draw(screen)
+        # Environment
+        ground.draw(screen)
+        ceiling.draw(screen)
 
-        # --- COMPORTAMIENTO ---
+        # --- BEHAVIOR ---
         # In Game
         if flying and game_over == False:
             icarus_group.update()
-            columnas_group.update()
-            suelo.update()
-            techo.update()
+            columns_group.update()
+            ground.update()
+            ceiling.update()
 
-            # Generar nuevas columnas
-            tiempo_actual = pygame.time.get_ticks()
-            if tiempo_actual - ultima_columna > configuracion.FRECUENCIA_COLUMNAS:
+            # Generate new columns
+            current_time = pygame.time.get_ticks()
+            if current_time - last_column > config.COLUMN_FREQUENCY:
                 column_height = random.randint(-100, 100)
                 
-                # Definir coordenadas del hueco
-                y_hueco_abajo = int(configuracion.SCREEN_HEIGHT/2) + 118 + column_height
-                y_hueco_arriba = int(configuracion.SCREEN_HEIGHT/2) - 118 + column_height
+                # Define gap coordinates
+                y_gap_bottom = int(config.SCREEN_HEIGHT/2) + 118 + column_height
+                y_gap_top = int(config.SCREEN_HEIGHT/2) - 118 + column_height
                 
-                # --- COLUMNA DE ABAJO  ---
+                # --- BOTTOM COLUMN  ---
                 # Base
-                base_abajo = ColumnaBase(configuracion.SCREEN_WIDTH + 6, -1)
-                columnas_group.add(base_abajo)
+                base_bottom = ColumnBase(config.SCREEN_WIDTH + 6, -1)
+                columns_group.add(base_bottom)
                 
-                # Calculamos altura para el cuerpo
-                # La base está en (SCREEN_HEIGHT - ENV_HEIGHT), así que restamos su propia altura
-                altura_disponible_abajo = base_abajo.rect.top - y_hueco_abajo
+                # Calculate height for the body
+                # The base is at (SCREEN_HEIGHT - ENV_HEIGHT), so we subtract its own height
+                available_height_bottom = base_bottom.rect.top - y_gap_bottom
                 
-                # Creamos el resto de la columna
-                cuerpo_abajo = ColumnaCuerpo(configuracion.SCREEN_WIDTH, y_hueco_abajo, -1, altura_disponible_abajo)
-                columnas_group.add(cuerpo_abajo)
+                # Create the rest of the column
+                body_bottom = ColumnBody(config.SCREEN_WIDTH, y_gap_bottom, -1, available_height_bottom)
+                columns_group.add(body_bottom)
 
 
-                # --- COLUMNA DE ARRIBA ---
-                # REPETIMOS LOS PASOS DE LA COLUMNA DE ABAJO
-                # Creamos la Base
-                base_arriba = ColumnaBase(configuracion.SCREEN_WIDTH + 6, 1)
-                columnas_group.add(base_arriba)
+                # --- TOP COLUMN ---
+                # REPEAT THE STEPS OF THE BOTTOM COLUMN
+                # Create the Base
+                base_top = ColumnBase(config.SCREEN_WIDTH + 6, 1)
+                columns_group.add(base_top)
 
-                # Calculamos altura para el cuerpo
-                altura_disponible_arriba = y_hueco_arriba - base_arriba.rect.bottom
+                # Calculate height for the body
+                available_height_top = y_gap_top - base_top.rect.bottom
 
-                # Creamos el resto de la columna
-                cuerpo_arriba = ColumnaCuerpo(configuracion.SCREEN_WIDTH, y_hueco_arriba, 1, altura_disponible_arriba)
-                columnas_group.add(cuerpo_arriba)
+                # Create the rest of the column
+                body_top = ColumnBody(config.SCREEN_WIDTH, y_gap_top, 1, available_height_top)
+                columns_group.add(body_top)
 
-                ultima_columna = pygame.time.get_ticks()
+                last_column = pygame.time.get_ticks()
     
         # Game Over
-        if icarus.rect.bottom >= (configuracion.SCREEN_HEIGHT - configuracion.ENV_HEIGHT) or icarus.rect.top <= configuracion.ENV_HEIGHT:
+        if icarus.rect.bottom >= (config.SCREEN_HEIGHT - config.ENV_HEIGHT) or icarus.rect.top <= config.ENV_HEIGHT:
             game_over = True
-            dibujar_texto('GAME OVER', title_font, configuracion.NARANJA, configuracion.SCREEN_WIDTH/2, configuracion.SCREEN_HEIGHT/2 - 50, screen)
-        if pygame.sprite.groupcollide(icarus_group, columnas_group, False, False, pygame.sprite.collide_mask):
+            draw_text('GAME OVER', title_font, config.ORANGE, config.SCREEN_WIDTH/2, config.SCREEN_HEIGHT/2 - 50, screen)
+        if pygame.sprite.groupcollide(icarus_group, columns_group, False, False, pygame.sprite.collide_mask):
             game_over = True
-            dibujar_texto('GAME OVER', title_font, configuracion.NARANJA, configuracion.SCREEN_WIDTH/2, configuracion.SCREEN_HEIGHT/2 - 50, screen)
+            draw_text('GAME OVER', title_font, config.ORANGE, config.SCREEN_WIDTH/2, config.SCREEN_HEIGHT/2 - 50, screen)
         
 
-        # --- EVENTOS ---
+        # --- EVENTS ---
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
@@ -148,21 +148,21 @@ while run:
             if(game_over and (event.type == pygame.MOUSEBUTTONDOWN or 
                 (event.type == pygame.KEYDOWN and 
                  event.key == pygame.K_SPACE))):
-                # Reiniciar el juego
+                # Restart the game
                 flying = False
                 game_over = False
 
-                # Reiniciar posición de Ícaro
-                icarus.rect.center = (100, int(configuracion.SCREEN_HEIGHT/2))
-                icarus.velocidad = 0
+                # Restart Icarus position
+                icarus.rect.center = (100, int(config.SCREEN_HEIGHT/2))
+                icarus.velocity = 0
 
-                # Vaciar columnas
-                columnas_group.empty()
+                # Clear columns
+                columns_group.empty()
                 
-                # Reiniciar tiempo de generación de columnas
-                ultima_columna = pygame.time.get_ticks()
+                # Restart column generation time
+                last_column = pygame.time.get_ticks()
 
-        dibujar_texto("score: " + str(score), score_font, configuracion.NARANJA, configuracion.SCREEN_WIDTH // 2, 50, screen)
+        draw_text("score: " + str(score), score_font, config.ORANGE, config.SCREEN_WIDTH // 2, 50, screen)
         pygame.display.update()
 
 pygame.quit()

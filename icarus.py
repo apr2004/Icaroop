@@ -1,7 +1,7 @@
 import pygame
-import configuracion
+import config
 
-# --- Clase Jugador (Ícaro) ---
+# --- Player Class (Icarus) ---
 class Icarus(pygame.sprite.Sprite):
      def __init__(self, x, y):
           pygame.sprite.Sprite.__init__(self)
@@ -10,51 +10,51 @@ class Icarus(pygame.sprite.Sprite):
           
           self.counter = 0
           for num in range(1,4):
-            img = pygame.image.load(f'{configuracion.IMAGE_PATH}icarus{num}.png').convert_alpha()
-            img = pygame.transform.scale(img, (configuracion.ICARUS_WIDTH, configuracion.ICARUS_HEIGHT))
+            img = pygame.image.load(f'{config.IMAGE_PATH}icarus{num}.png').convert_alpha()
+            img = pygame.transform.scale(img, (config.ICARUS_WIDTH, config.ICARUS_HEIGHT))
             self.images.append(img)
           self.image = self.images[self.index]
           
-          #self.image = pygame.image.load(f'{configuracion.IMAGE_PATH}icarus.jpeg').convert_alpha()
+          #self.image = pygame.image.load(f'{config.IMAGE_PATH}icarus.jpeg').convert_alpha()
           self.rect = self.image.get_rect()
           self.rect.center = [x, y]
-          self.vel = 0
+          self.velocity = 0
           self.clicked = False
 
      def update(self):
-          # Aplicar gravedad
-          self.vel += configuracion.GRAVITY
+          # Apply gravity
+          self.velocity += config.GRAVITY
 
-          # Limitamos la velocidad máxima de caída
-          if(self.vel > configuracion.LIMIT_VELOCITY):
-               self.vel = configuracion.LIMIT_VELOCITY
+          # Limit maximum fall velocity
+          if(self.velocity > config.LIMIT_VELOCITY):
+               self.velocity = config.LIMIT_VELOCITY
 
-          # Limites de los bordes
-          if self.rect.bottom < (configuracion.SCREEN_HEIGHT - configuracion.ENV_HEIGHT):
-               self.rect.y += int(self.vel)
+          # Border limits
+          if self.rect.bottom < (config.SCREEN_HEIGHT - config.ENV_HEIGHT):
+               self.rect.y += int(self.velocity)
 
-          if self.rect.top < (configuracion.ENV_HEIGHT):
-               self.vel = 0
+          if self.rect.top < (config.ENV_HEIGHT):
+               self.velocity = 0
                
 
-          # Salto con ratón y/o tecclado
+          # Jump with mouse and/or keyboard
           '''
-          get_pressed devuelve un array con el estado de todos los botones del ratón
-          El índice 0 es el botón izquierdo
+          get_pressed returns an array with the state of all mouse buttons
+          Index 0 is the left button
           '''
           if (pygame.mouse.get_pressed()[0] == 1 or pygame.key.get_pressed()[pygame.K_SPACE] == 1) and self.clicked == False:
                self.clicked = True
-               self.vel = configuracion.JUMP
+               self.velocity = config.JUMP
 
-          # Para evitar múltiples saltos con una sola pulsación
+          # To avoid multiple jumps with a single press
           if pygame.mouse.get_pressed()[0] == 0 and pygame.key.get_pressed()[pygame.K_SPACE] == 0:
                self.clicked = False
 
 
-          # Manejo de la animación
+          # Animation handling
           self.counter += 1
 
-          if self.counter > configuracion.FLAP_COOLDOWN:
+          if self.counter > config.FLAP_COOLDOWN:
                self.counter = 0
                self.index += 1
                if self.index >= len(self.images):
@@ -62,7 +62,7 @@ class Icarus(pygame.sprite.Sprite):
           self.image = self.images[self.index]
           
 
-          # rotación de la imagen
-          self.image = pygame.transform.rotate(self.images[self.index], self.vel*configuracion.ROTATION_ANGLE) # cambiar 0 por self.index para animación
-          # Actualizar máscara para colisiones precisas tras la rotación/animación
+          # Image rotation
+          self.image = pygame.transform.rotate(self.images[self.index], self.velocity*config.ROTATION_ANGLE) # change 0 to self.index for animation
+          # Update mask for precise collisions after rotation/animation
           self.mask = pygame.mask.from_surface(self.image)
