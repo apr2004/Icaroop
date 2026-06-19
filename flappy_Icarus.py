@@ -52,6 +52,17 @@ def draw_text(text, font, color, x, y, screen):
     # Draw on screen
     screen.blit(text_image, text_rect)
 
+# Update the score when Icarus passes a column
+def update_score(score, inside_column):
+    if len(columns_group) > 0:
+        if icarus_group.sprites()[0].rect.right > columns_group.sprites()[0].rect.left and icarus_group.sprites()[0].rect.left < columns_group.sprites()[0].rect.right and not inside_column:
+            inside_column = True
+    if inside_column:
+        if icarus_group.sprites()[0].rect.left > columns_group.sprites()[0].rect.right:
+            score += 1
+            inside_column = False
+    return score, inside_column
+
 # Background (with protection in case of failure)
 try:
     bg = pygame.image.load(f'{config.IMAGE_PATH}fondo.png').convert()
@@ -63,6 +74,7 @@ except:
 
 # Game loop
 score = 0
+inside_column = False
 run = True
 while run:
         clock.tick(config.FPS) 
@@ -89,6 +101,7 @@ while run:
             columns_group.update()
             ground.update()
             ceiling.update()
+            score, inside_column = update_score(score, inside_column)
 
             # Generate new columns
             current_time = pygame.time.get_ticks()
@@ -162,7 +175,7 @@ while run:
                 # Restart column generation time
                 last_column = pygame.time.get_ticks()
 
-        draw_text("score: " + str(score), score_font, config.ORANGE, config.SCREEN_WIDTH // 2, 50, screen)
+        draw_text("SCORE " + str(score), score_font, config.ORANGE, 100, 90, screen)
         pygame.display.update()
 
 pygame.quit()
