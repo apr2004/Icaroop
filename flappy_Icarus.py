@@ -53,15 +53,16 @@ def draw_text(text, font, color, x, y, screen):
     screen.blit(text_image, text_rect)
 
 # Update the score when Icarus passes a column
-def update_score(score, inside_column):
+def update_score(score, inside_column, speed_increment):
     if len(columns_group) > 0:
         if icarus_group.sprites()[0].rect.right > columns_group.sprites()[0].rect.left and icarus_group.sprites()[0].rect.left < columns_group.sprites()[0].rect.right and not inside_column:
             inside_column = True
     if inside_column:
         if icarus_group.sprites()[0].rect.left > columns_group.sprites()[0].rect.right:
             score += 1
+            speed_increment += 0.1
             inside_column = False
-    return score, inside_column
+    return score, inside_column, speed_increment
 
 # Background (with protection in case of failure)
 try:
@@ -75,6 +76,7 @@ except:
 # Game loop
 score = 0
 inside_column = False
+speed_increment = 0
 run = True
 while run:
         clock.tick(config.FPS) 
@@ -98,10 +100,10 @@ while run:
         # In Game
         if flying and game_over == False:
             icarus_group.update()
-            columns_group.update()
-            ground.update()
-            ceiling.update()
-            score, inside_column = update_score(score, inside_column)
+            columns_group.update(speed_increment)
+            ground.update(speed_increment)
+            ceiling.update(speed_increment)
+            score, inside_column, speed_increment = update_score(score, inside_column, speed_increment)
 
             # Generate new columns
             current_time = pygame.time.get_ticks()

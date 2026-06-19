@@ -7,7 +7,7 @@ FLYING = False
 GAME_OVER = False
 
 # Game configuration
-SCROLL_SPEED = 4
+INITIAL_SCROLL_SPEED = 4
 FLAP_COOLDOWN = 7 # For character animation
 GRAVITY = 0.5
 LIMIT_VELOCITY = 8

@@ -26,9 +26,9 @@ class MovingPlatform(pygame.sprite.Sprite):
         self.width = new_width
         self.x_position = 0 
 
-    def update(self):
+    def update(self, speed_increment):
         # Move X position
-        self.x_position -= config.SCROLL_SPEED
+        self.x_position -= config.INITIAL_SCROLL_SPEED + speed_increment
         
         # Reset infinite scroll
         if self.x_position <= -self.width:

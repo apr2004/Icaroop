@@ -22,7 +22,7 @@ class Columns(pygame.sprite.Sprite):
                 # Mask for precise collisions
                 self.mask = pygame.mask.from_surface(self.image)
 
-        def update(self):
-                self.rect.x -= config.SCROLL_SPEED
+        def update(self, speed_increment):
+                self.rect.x -= config.INITIAL_SCROLL_SPEED + speed_increment
                 if self.rect.right < 0:
                         self.kill()
