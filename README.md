@@ -39,7 +39,6 @@ python flappy_icarus.py
 
 ## To-Do List
 
-* [ ] **Implement Scoring Logic:** Connect the obstacle clearance to the `score` variable so it increments dynamically when safely passing columns.
 * [ ] **Repository Cleanup:** Remove the `discarded_classes/` directory and the unused `columns.py` script to keep the production codebase clean.
 * [ ] **Audio Integration:** Add sound effects for jumping, scoring, and crashing, alongside a retro background music track.
 * [ ] **High Score System:** Implement a local storage system (using a simple `.txt` or `.json` file) to save and display the player's all-time high score.
