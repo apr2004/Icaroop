@@ -1,3 +1,4 @@
+import asyncio
 import pygame
 from pygame.locals import *
 import random
@@ -89,66 +90,70 @@ def spawn_column_pair(assets, columns_group):
 # subsequent one
 spawn_column_pair(assets, columns_group)
 
-# Game loop
-run = True
-while run:
-    clock.tick(config.FPS)
-    screen.blit(assets.background, (0, 0))
+async def main():
+    run = True
+    while run:
+        clock.tick(config.FPS)
+        screen.blit(assets.background, (0, 0))
 
-    # --- DRAW ---
-    if not state.flying and not state.game_over:
-        draw_text('PLAY', title_font, config.ORANGE, config.SCREEN_WIDTH / 2, config.SCREEN_HEIGHT / 2 - 50, screen)
+        # --- DRAW ---
+        if not state.flying and not state.game_over:
+            draw_text('PLAY', title_font, config.ORANGE, config.SCREEN_WIDTH / 2, config.SCREEN_HEIGHT / 2 - 50, screen)
 
-    # Player
-    if state.flying or state.game_over:
-        icarus_group.draw(screen)
+        # Player
+        if state.flying or state.game_over:
+            icarus_group.draw(screen)
 
-    # Columns
-    columns_group.draw(screen)
+        # Columns
+        columns_group.draw(screen)
 
-    # Environment
-    ground.draw(screen)
-    ceiling.draw(screen)
+        # Environment
+        ground.draw(screen)
+        ceiling.draw(screen)
 
-    # --- BEHAVIOR ---
-    # In Game
-    if state.flying and not state.game_over:
-        icarus_group.update()
-        columns_group.update(state.speed_increment)
-        ground.update(state.speed_increment)
-        ceiling.update(state.speed_increment)
-        state.update_score()
+        # --- BEHAVIOR ---
+        # In Game
+        if state.flying and not state.game_over:
+            icarus_group.update()
+            columns_group.update(state.speed_increment)
+            ground.update(state.speed_increment)
+            ceiling.update(state.speed_increment)
+            state.update_score()
 
-        # Generate new columns
-        current_time = pygame.time.get_ticks()
-        if state.time_for_new_column(current_time):
-            spawn_column_pair(assets, columns_group)
-            state.register_column_spawn(current_time)
+            # Generate new columns
+            current_time = pygame.time.get_ticks()
+            if state.time_for_new_column(current_time):
+                spawn_column_pair(assets, columns_group)
+                state.register_column_spawn(current_time)
 
-    # Game Over
-    if icarus.rect.bottom >= (config.SCREEN_HEIGHT - config.ENV_HEIGHT) or icarus.rect.top <= config.ENV_HEIGHT:
-        state.end_game()
-    if pygame.sprite.groupcollide(icarus_group, columns_group, False, False, pygame.sprite.collide_mask):
-        state.end_game()
+        # Game Over
+        if icarus.rect.bottom >= (config.SCREEN_HEIGHT - config.ENV_HEIGHT) or icarus.rect.top <= config.ENV_HEIGHT:
+            state.end_game()
+        if pygame.sprite.groupcollide(icarus_group, columns_group, False, False, pygame.sprite.collide_mask):
+            state.end_game()
 
-    if state.game_over:
-        draw_text('GAME OVER', title_font, config.ORANGE, config.SCREEN_WIDTH / 2, config.SCREEN_HEIGHT / 2 - 50, screen)
+        if state.game_over:
+            draw_text('GAME OVER', title_font, config.ORANGE, config.SCREEN_WIDTH / 2, config.SCREEN_HEIGHT / 2 - 50, screen)
 
-    # --- EVENTS ---
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            run = False
-        if (event.type == pygame.MOUSEBUTTONDOWN or
-                (event.type == pygame.KEYDOWN and
-                 event.key == pygame.K_SPACE)) and not state.flying and not state.game_over:
-            state.start_flying()
-        if state.game_over and (event.type == pygame.MOUSEBUTTONDOWN or
-                                 (event.type == pygame.KEYDOWN and
-                                  event.key == pygame.K_SPACE)):
-            state.reset()
-            spawn_column_pair(assets, columns_group)
+        # --- EVENTS ---
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                run = False
+            if (event.type == pygame.MOUSEBUTTONDOWN or
+                    (event.type == pygame.KEYDOWN and
+                     event.key == pygame.K_SPACE)) and not state.flying and not state.game_over:
+                state.start_flying()
+            if state.game_over and (event.type == pygame.MOUSEBUTTONDOWN or
+                                     (event.type == pygame.KEYDOWN and
+                                      event.key == pygame.K_SPACE)):
+                state.reset()
+                spawn_column_pair(assets, columns_group)
 
-    draw_text("SCORE " + str(state.score), score_font, config.ORANGE, 100, 90, screen)
-    pygame.display.update()
+        draw_text("SCORE " + str(state.score), score_font, config.ORANGE, 100, 90, screen)
+        pygame.display.update()
+        await asyncio.sleep(0)
 
-pygame.quit()
+    pygame.quit()
+
+
+asyncio.run(main())
