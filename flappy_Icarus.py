@@ -8,7 +8,6 @@ from columns import Columns
 from base_column import ColumnBase
 from column_body import ColumnBody
 
-
 pygame.init()
 clock = pygame.time.Clock()
 
@@ -64,6 +63,29 @@ def update_score(score, inside_column, speed_increment):
             inside_column = False
     return score, inside_column, speed_increment
 
+# Reset the game to its initial state
+def reset_game():
+    global flying, game_over, score, inside_column, speed_increment, last_column
+
+    flying = False
+    game_over = False
+    score = 0
+    inside_column = False
+    speed_increment = 0
+
+    icarus.rect.center = (100, int(config.SCREEN_HEIGHT/2))
+    icarus.velocity = 0
+    icarus.clicked = False
+
+    columns_group.empty()
+
+    bottom_column = Columns(-config.SCREEN_WIDTH, int(config.SCREEN_HEIGHT/2) + 118, -1)
+    top_column = Columns(-config.SCREEN_WIDTH, int(config.SCREEN_HEIGHT/2) - 118, 1)
+    columns_group.add(bottom_column)
+    columns_group.add(top_column)
+
+    last_column = pygame.time.get_ticks()
+
 # Background (with protection in case of failure)
 try:
     bg = pygame.image.load(f'{config.IMAGE_PATH}fondo.png').convert()
@@ -87,7 +109,8 @@ while run:
             draw_text('PLAY', title_font, config.ORANGE, config.SCREEN_WIDTH/2, config.SCREEN_HEIGHT/2 - 50, screen)
 
         # Player
-        icarus_group.draw(screen)
+        if flying or game_over:
+            icarus_group.draw(screen)
 
         # Columns
         columns_group.draw(screen)
@@ -163,19 +186,7 @@ while run:
             if(game_over and (event.type == pygame.MOUSEBUTTONDOWN or 
                 (event.type == pygame.KEYDOWN and 
                  event.key == pygame.K_SPACE))):
-                # Restart the game
-                flying = False
-                game_over = False
-
-                # Restart Icarus position
-                icarus.rect.center = (100, int(config.SCREEN_HEIGHT/2))
-                icarus.velocity = 0
-
-                # Clear columns
-                columns_group.empty()
-                
-                # Restart column generation time
-                last_column = pygame.time.get_ticks()
+                reset_game()
 
         draw_text("SCORE " + str(score), score_font, config.ORANGE, 100, 90, screen)
         pygame.display.update()
