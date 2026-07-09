@@ -22,9 +22,25 @@ COLUMN_SCALE = 0.6
 COLUMN_GAP = 150
 COLUMN_FREQUENCY = 1100  # in milliseconds
 
+# Half of the vertical gap between the top and bottom column, measured from
+# the screen's vertical center to each column's inner edge.
+COLUMN_GAP_HALF = 118
+ 
+# Random vertical variation applied to the gap's center every time a new
+# column pair spawns.
+COLUMN_HEIGHT_VARIATION = 100
+ 
+# Scoring / difficulty ramp-up
+SCORE_INCREMENT = 1
+SPEED_INCREMENT_STEP = 0.1
+
 # Icarus configuration
 ICARUS_WIDTH = 105
 ICARUS_HEIGHT = 85
+
+# Icarus starting position
+ICARUS_START_X = 100
+ICARUS_START_Y = SCREEN_HEIGHT // 2
 
 # Typography configuration
 FONT_PATH = 'typography/'
