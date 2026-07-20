@@ -33,7 +33,8 @@ python flappy_icarus.py
 
 ```
 
-
+## Demo
+![Demo](./images/demo.gif)
 
 ---
 
